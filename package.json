@@ -1,0 +1,29 @@
+{
+  "name": "waku-auth-middleware-demo",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "waku dev",
+    "build": "waku build",
+    "start": "waku start"
+  },
+  "dependencies": {
+    "@edge-runtime/cookies": "^4.1.1",
+    "@lucia-auth/adapter-sqlite": "^3.0.1",
+    "lucia": "^3.2.0",
+    "oslo": "^1.2.0",
+    "react": "19.0.0-canary-e3ebcd54b-20240405",
+    "react-dom": "19.0.0-canary-e3ebcd54b-20240405",
+    "react-error-boundary": "^4.0.13",
+    "react-server-dom-webpack": "19.0.0-canary-e3ebcd54b-20240405",
+    "waku": "^0.20.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.74",
+    "@types/react-dom": "18.2.24",
+    "autoprefixer": "10.4.19",
+    "tailwindcss": "3.4.3",
+    "typescript": "5.4.4"
+  }
+}

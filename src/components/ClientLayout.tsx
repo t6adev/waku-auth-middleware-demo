@@ -3,12 +3,11 @@
 import { useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-// WIP Not working yet as expected because of Waku limitation of implementation
-function fallbackRender({ error }: { error: any }) {
+function FallbackComponent({ error }: { error: any }) {
   // Call resetErrorBoundary() to reset the error boundary and retry the render.
   useEffect(() => {
     if (error.statusCode === 401) {
-      window.location.href = '/login';
+      window.location.replace('/signup');
     }
   });
   console.log(error);
@@ -22,5 +21,5 @@ function fallbackRender({ error }: { error: any }) {
 }
 
 export const ClientLayout = ({ children }: { children: React.ReactNode }) => {
-  return <ErrorBoundary fallbackRender={fallbackRender}>{children}</ErrorBoundary>;
+  return <ErrorBoundary FallbackComponent={FallbackComponent}>{children}</ErrorBoundary>;
 };

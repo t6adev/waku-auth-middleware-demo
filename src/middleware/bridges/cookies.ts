@@ -1,9 +1,9 @@
-import { getContext } from 'waku/server';
+import { unstable_getCustomContext as getCustomContext } from 'waku/server';
 import { RequestCookies, ResponseCookies, type ResponseCookie } from '@edge-runtime/cookies';
 import { mergeSetCookies } from '../setCookie';
 
 const cookies = () => {
-  const ctx = getContext<{
+  const ctx = getCustomContext<{
     headers: Record<string, string | string[]>;
     cookies?: ResponseCookie[];
   }>();

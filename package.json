@@ -13,18 +13,18 @@
     "@lucia-auth/adapter-sqlite": "^3.0.1",
     "lucia": "^3.2.0",
     "oslo": "^1.2.0",
-    "react": "19.0.0-rc-7771d3a7-20240827",
-    "react-dom": "19.0.0-rc-7771d3a7-20240827",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "react-error-boundary": "^4.0.13",
-    "react-server-dom-webpack": "19.0.0-rc-7771d3a7-20240827",
-    "waku": "^0.21.1"
+    "react-server-dom-webpack": "19.1.0",
+    "waku": "^0.22.1"
   },
   "devDependencies": {
-    "@types/react": "18.2.74",
-    "@types/react-dom": "18.2.24",
-    "autoprefixer": "10.4.19",
-    "tailwindcss": "3.4.3",
-    "typescript": "5.4.4"
+    "@types/react": "19.0.12",
+    "@types/react-dom": "19.0.4",
+    "postcss": "8.5.3",
+    "tailwindcss": "4.0.15",
+    "typescript": "5.8.2"
   },
   "packageManager": "pnpm@8.11.0+sha512.9df87c16c98db27b4e051d787e67f2207ec47e809ccb07bf7b5ec4acdcd1613355839a38d0b900144923d6a7057700b74d2a0ccb1558beb241647a1206a9a7ab"
 }

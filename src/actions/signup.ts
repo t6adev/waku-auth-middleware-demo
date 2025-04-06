@@ -2,7 +2,7 @@
 import { generateIdFromEntropySize, Scrypt } from 'lucia';
 // Use Scrypt instead: https://lucia-auth.com/guides/email-and-password/basics
 // import { Argon2id } from 'oslo/password'; // Can't build with this even if setting vite.config.ts
-import { unstable_redirect as redirect } from 'waku/router/server';
+import { unstable_rerenderRoute } from 'waku/router/server';
 
 import { lucia } from '../auth/lucia';
 import { validatePassword, validateUsername } from '../auth/utils';
@@ -42,6 +42,6 @@ export const signup = async (formData: FormData) => {
 
   const { setCookie } = cookies();
   setCookie(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
-  redirect('/protected');
+  unstable_rerenderRoute('/protected');
   return null;
 };

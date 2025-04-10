@@ -1,43 +1,35 @@
 import type { Middleware } from 'waku/config';
 import { RequestCookies, ResponseCookies } from '@edge-runtime/cookies';
 import { validateInMiddleware } from '../auth/validateInMiddleware';
-import wakuConfig from '../../waku.config.js';
 
-const { rscPath } = wakuConfig;
+const rscPagePath = 'RSC/R'; // waku router spec
+const rscFunctionPath = 'RSC/F'; // waku router spec
 const ignoreDynamicPaths = ['/about', '/privacy'];
 const fallbackPath = '/signup';
 const pathIfValid = {
   to: '/protected',
   targets: ['/login', fallbackPath],
 };
+const allPaths = [pathIfValid.to, ...pathIfValid.targets, ...ignoreDynamicPaths];
 
 const checkIgnores = (pathname: string) =>
-  ignoreDynamicPaths.some((p) => pathname === p || pathname === `/${rscPath}${p}.txt`);
+  ignoreDynamicPaths.some((p) => pathname === p || pathname === `/${rscPagePath}${p}.txt`);
 const isRSCPostRequest = (pathname: string, method: string) =>
-  pathname.startsWith(`/${rscPath}`) && method === 'POST';
-const isRSCRequest = (pathname: string) => pathname.startsWith(`/${rscPath}`);
+  pathname.startsWith(`/${rscFunctionPath}`) && method === 'POST';
+const isRSCRequest = (pathname: string) => pathname.startsWith(`/${rscPagePath}`);
+const isDevRequest = (pathname: string) =>
+  !allPaths.some((p) => pathname === p || pathname === `/${rscPagePath}${p}.txt`);
 
 const validateRoutingMiddleware: Middleware = (options) => {
   const isDev = options.cmd === 'dev';
 
   return async (ctx, next) => {
-    /** Note: All requests are handled here in prd if pages are dynamic. However, we need to handle requests that are in dev.
-     * As you can see, the following code is working in prd.
-     * ```waku/packages/waku/src/cli.ts
-     *   app.use('*', serveStatic({ root: path.join(distDir, publicDir) }));
-     *   app.use('*', runner({ cmd: 'start', loadEntries, env: process.env as any }));
-     * ```
-     */
-    // In dev, if it's false, the request is as text/html
-    // await ctx.devServer?.willBeHandledLater(ctx.req.url.pathname)
-    if (isDev) {
-      throw new Error('Not implemented yet. Run with build & start');
-    }
-
     const { pathname } = ctx.req.url;
+
     if (
       checkIgnores(pathname) ||
-      isRSCPostRequest(pathname, ctx.req.method) // It's assumed that it's a Server Action Request. You have to validate at the action.
+      isRSCPostRequest(pathname, ctx.req.method) || // It's assumed that it's a Server Action Request. You have to validate at the action.
+      (isDev && isDevRequest(pathname))
     ) {
       await next();
       return;
@@ -48,7 +40,9 @@ const validateRoutingMiddleware: Middleware = (options) => {
     const getCookie: RequestCookies['get'] = (...args) => reqCookies.get(...args);
     const setCookie: ResponseCookies['set'] = (...args) => resCookies.set(...args);
     const validated = await validateInMiddleware(getCookie, setCookie);
-    const isTarget = pathIfValid.targets.includes(pathname);
+    const isTarget = pathIfValid.targets.some(
+      (t) => pathname === t || pathname === `/${rscPagePath}${t}.txt`
+    );
     if (validated) {
       if (isTarget) {
         ctx.res.status = 302;

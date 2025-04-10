@@ -17,7 +17,7 @@ const setCookieMiddleware: Middleware = () => {
     ctx.res.headers ||= {};
     ctx.res.headers['set-cookie'] = mergeSetCookies(
       ctx.res.headers['set-cookie'] || [],
-      (ctx.context?.cookies || []) as ResponseCookie[]
+      (ctx.data.cookies || []) as ResponseCookie[]
     );
   };
 };

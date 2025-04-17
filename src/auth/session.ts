@@ -5,6 +5,8 @@ import type { User, Session } from '../db/type';
 import { users } from '../db/users';
 import { sessions } from '../db/sessions';
 
+const sessionDuration = 1000 * 60; // e.g. 1000 * 60 * 60 * 24 * 30
+
 export function generateSessionToken(): string {
   const bytes = new Uint8Array(20);
   crypto.getRandomValues(bytes);
@@ -17,7 +19,7 @@ export async function createSession(token: string, userId: string): Promise<Sess
   const session: Session = {
     id: sessionId,
     userId,
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+    expiresAt: new Date(Date.now() + sessionDuration),
   };
   await sessions.create(session);
   return session;
@@ -37,8 +39,8 @@ export async function validateSessionToken(token: string): Promise<SessionValida
     await sessions.deleteManyById(sessionId);
     return { session: null, user: null };
   }
-  if (Date.now() >= session.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
-    session.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+  if (Date.now() >= session.expiresAt.getTime() - sessionDuration / 2) {
+    session.expiresAt = new Date(Date.now() + sessionDuration);
     await sessions.updateExpiresAt(session.id, session.expiresAt);
   }
   return { session, user };

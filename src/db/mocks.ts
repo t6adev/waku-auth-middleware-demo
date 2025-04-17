@@ -1,6 +1,10 @@
 import type { User, Session } from './type';
 
-const data: { users: User[]; sessions: Session[] } = {
+declare global {
+  var MOCK_DATA_STORE: { users: User[]; sessions: Session[] };
+}
+
+globalThis.MOCK_DATA_STORE = {
   users: [],
   sessions: [],
 };
@@ -16,6 +20,7 @@ class BaseModel {
   async findUnique(id: string): Promise<any> {
     await sleep(500);
     // Yes, this is lazy
+    const data = globalThis.MOCK_DATA_STORE
     const session = data.sessions.find((u) => u.id === id);
     const userBySessionId = data.users.find((u) => u.id === session?.userId);
     if (this.name === 'sessions') {
@@ -28,18 +33,21 @@ class BaseModel {
 
   async findMany(id: string): Promise<any[]> {
     await sleep(500);
+    const data = globalThis.MOCK_DATA_STORE
     const found = data[this.name].filter((u) => u.id === id);
     return found;
   }
 
   async create(attributes: any): Promise<any> {
     await sleep(500);
+    const data = globalThis.MOCK_DATA_STORE
     data[this.name].push(attributes);
     return attributes;
   }
 
   async updateExpiresAt(id: string, expiresAt: Date): Promise<any> {
     await sleep(500);
+    const data = globalThis.MOCK_DATA_STORE
     const found = data[this.name].find((u) => u.id === id);
     if (!found) throw new Error('Not found');
     const updated = { ...found, expiresAt };
@@ -54,8 +62,9 @@ class BaseModel {
 
   async deleteManyById(id: string): Promise<void> {
     await sleep(500);
+    const data = globalThis.MOCK_DATA_STORE
     // @ts-ignore
-    data[this.name] = data[this.name].filter((d) => d.id !== id);
+    globalThis.MOCK_DATA_STORE = data[this.name].filter((d) => d.id !== id);
   }
 }
 
@@ -109,6 +118,7 @@ export class SessionModel<S extends Session> extends BaseModel {
   }
   async deleteManyExpired(): Promise<void> {
     await sleep(500);
+    const data = globalThis.MOCK_DATA_STORE
     data.sessions = data.sessions.filter((d) => d.expiresAt.getTime() > new Date().getTime());
   }
 }

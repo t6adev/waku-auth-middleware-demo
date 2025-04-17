@@ -21,7 +21,7 @@ export const signin = async (formData: FormData) => {
       error: 'Invalid',
     };
   }
-  const existingUser = await users.findUnique(username);
+  const existingUser = await users.findUniqueByUsername(username);
   if (!existingUser) {
     return {
       error: 'Invalid',

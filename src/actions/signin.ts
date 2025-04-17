@@ -35,10 +35,10 @@ export const signin = async (formData: FormData) => {
     };
   }
 
-  const token = generateSessionToken();
-  const session = await createSession(token, existingUser.id);
+  const sessionToken = generateSessionToken();
+  const session = await createSession(sessionToken, existingUser.id);
 
-  const sessionCookie = createSessionCookie(session.id, session.expiresAt);
+  const sessionCookie = createSessionCookie(sessionToken, session.expiresAt);
 
   const { setCookie } = cookies();
   setCookie(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);

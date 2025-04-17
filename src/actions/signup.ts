@@ -38,10 +38,10 @@ export const signup = async (formData: FormData) => {
     hashed_password: hashedPassword,
   });
 
-  const token = generateSessionToken();
-  const session = await createSession(token, userId);
+  const sessionToken = generateSessionToken();
+  const session = await createSession(sessionToken, userId);
 
-  const sessionCookie = createSessionCookie(session.id, session.expiresAt);
+  const sessionCookie = createSessionCookie(sessionToken, session.expiresAt);
 
   const { setCookie } = cookies();
   setCookie(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);

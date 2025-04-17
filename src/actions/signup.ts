@@ -4,10 +4,11 @@ import { generateIdFromEntropySize, Scrypt } from 'lucia';
 // import { Argon2id } from 'oslo/password'; // Can't build with this even if setting vite.config.ts
 import { unstable_rerenderRoute } from 'waku/router/server';
 
-import { lucia } from '../auth/lucia';
 import { validatePassword, validateUsername } from '../auth/utils';
 import { users } from '../db/users';
 import { cookies } from '../middleware/bridges/cookies';
+import { createSession, generateSessionToken } from '../auth/session';
+import { createSessionCookie } from '../auth/cookie';
 
 const scrypt = new Scrypt();
 
@@ -37,8 +38,10 @@ export const signup = async (formData: FormData) => {
     hashed_password: hashedPassword,
   });
 
-  const session = await lucia.createSession(userId, {});
-  const sessionCookie = lucia.createSessionCookie(session.id);
+  const token = generateSessionToken();
+  const session = await createSession(token, userId);
+
+  const sessionCookie = createSessionCookie(session.id, session.expiresAt);
 
   const { setCookie } = cookies();
   setCookie(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);

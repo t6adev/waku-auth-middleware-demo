@@ -1,19 +1,21 @@
 import type { Middleware } from 'waku/config';
-import { RequestCookies, ResponseCookies } from '@edge-runtime/cookies';
 import { validateInMiddleware } from '../auth/validateInMiddleware';
+import { cookies } from './bridges/cookies';
+import { createSessionCookie, sessionCookieName } from '../auth/cookie';
+import { mergeSetCookies } from './setCookie';
 
 const rscPagePath = 'RSC/R'; // waku router spec
 const rscFunctionPath = 'RSC/F'; // waku router spec
-const ignoreDynamicPaths = ['/about', '/privacy'];
+const ignorePaths = ['/favicon.ico', '/about', '/privacy'];
 const fallbackPath = '/signup';
 const pathIfValid = {
   to: '/protected',
   targets: ['/login', fallbackPath],
 };
-const allPaths = [pathIfValid.to, ...pathIfValid.targets, ...ignoreDynamicPaths];
+const allPaths = [pathIfValid.to, ...pathIfValid.targets, ...ignorePaths];
 
 const checkIgnores = (pathname: string) =>
-  ignoreDynamicPaths.some((p) => pathname === p || pathname === `/${rscPagePath}${p}.txt`);
+  ignorePaths.some((p) => pathname === p || pathname === `/${rscPagePath}${p}.txt`);
 const isRSCPostRequest = (pathname: string, method: string) =>
   pathname.startsWith(`/${rscFunctionPath}`) && method === 'POST';
 const isRSCRequest = (pathname: string) => pathname.startsWith(`/${rscPagePath}`);
@@ -34,16 +36,29 @@ const validateRoutingMiddleware: Middleware = (options) => {
       await next();
       return;
     }
-    const headers = new Headers(ctx.req.headers);
-    const reqCookies = new RequestCookies(headers);
-    const resCookies = new ResponseCookies(headers);
-    const getCookie: RequestCookies['get'] = (...args) => reqCookies.get(...args);
-    const setCookie: ResponseCookies['set'] = (...args) => resCookies.set(...args);
-    const validated = await validateInMiddleware(getCookie, setCookie);
+    ctx.res.headers ||= {};
+    const { getCookie, setCookie } = cookies();
+    const sessionToken = getCookie(sessionCookieName)?.value ?? null;
+    const sessionValidationResult = await validateInMiddleware(sessionToken);
+    if (sessionToken && sessionValidationResult && sessionValidationResult.session) {
+      const sessionCookie = createSessionCookie(
+        sessionToken,
+        sessionValidationResult.session.expiresAt
+      );
+      const responseCookies = setCookie(
+        sessionCookie.name,
+        sessionCookie.value,
+        sessionCookie.attributes
+      );
+      ctx.res.headers['set-cookie'] = mergeSetCookies(
+        ctx.res.headers['set-cookie'] || [],
+        responseCookies.getAll()
+      );
+    }
     const isTarget = pathIfValid.targets.some(
       (t) => pathname === t || pathname === `/${rscPagePath}${t}.txt`
     );
-    if (validated) {
+    if (!!sessionValidationResult?.session) {
       if (isTarget) {
         ctx.res.status = 302;
         ctx.res.headers = { ...ctx.res.headers, Location: pathIfValid.to };
@@ -51,7 +66,9 @@ const validateRoutingMiddleware: Middleware = (options) => {
       }
       await next();
       return;
-    } else if (isTarget) {
+    }
+
+    if (isTarget) {
       await next();
       return;
     }

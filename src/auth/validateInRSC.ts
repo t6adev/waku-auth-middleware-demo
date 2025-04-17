@@ -16,7 +16,7 @@ export const validateInRSC = cache(async (): Promise<SessionValidationResult> =>
 
   const result = await validateSessionToken(sessionToken);
   if (result.session) {
-    const sessionCookie = createSessionCookie(result.session.id, result.session.expiresAt);
+    const sessionCookie = createSessionCookie(sessionToken, result.session.expiresAt);
     setCookie(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
     return result;
   }

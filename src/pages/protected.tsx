@@ -1,10 +1,12 @@
 import { Link } from 'waku';
+import { unstable_rerenderRoute } from 'waku/router/server';
 import { validateInRSC } from '../auth/validateInRSC';
 
 export default async function ProtectedtPage() {
   const auth = await validateInRSC();
   if (!auth.user) {
-    return <div>Invalid auth: Unexpected here.</div>;
+    unstable_rerenderRoute('/login');
+    return;
   }
   const { user } = auth;
 

@@ -1,3 +1,5 @@
+import type { User, Session } from './type';
+
 const data: { users: User[]; sessions: Session[] } = {
   users: [],
   sessions: [],
@@ -57,11 +59,6 @@ class BaseModel {
   }
 }
 
-interface User {
-  id: string;
-  username: string;
-  hashed_password: string;
-}
 export class UserModel<U extends User> extends BaseModel {
   constructor() {
     super('users');
@@ -87,12 +84,6 @@ export class UserModel<U extends User> extends BaseModel {
   }
 }
 
-interface Session {
-  id: string;
-  userId: string;
-  expiresAt: Date;
-  // fresh: boolean;
-}
 export class SessionModel<S extends Session> extends BaseModel {
   constructor() {
     super('sessions');

@@ -11,6 +11,8 @@
   "dependencies": {
     "@edge-runtime/cookies": "^4.1.1",
     "@lucia-auth/adapter-sqlite": "^3.0.1",
+    "@oslojs/crypto": "^1.0.1",
+    "@oslojs/encoding": "^1.1.0",
     "lucia": "^3.2.0",
     "oslo": "^1.2.0",
     "react": "19.1.0",
